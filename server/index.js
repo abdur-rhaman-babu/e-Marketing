@@ -36,7 +36,6 @@ const verifyToken = async (req, res, next) => {
   });
 };
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.6avkk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -50,7 +49,7 @@ async function run() {
   try {
     const db = client.db("e-marketing");
     const userCollections = db.collection("users");
-    const productCollections = db.collection('products')
+    const productCollections = db.collection("products");
 
     // save or update user
     app.post("/user/:email", async (req, res) => {
@@ -70,20 +69,26 @@ async function run() {
       res.send(result);
     });
 
-
     // save product in db
-    app.post('/product', verifyToken, async (req, res)=>{
-      const product = req.body
-      const result = await productCollections.insertOne(product)
-      res.send(result)
-    })
+    app.post("/product", verifyToken, async (req, res) => {
+      const product = req.body;
+      const result = await productCollections.insertOne(product);
+      res.send(result);
+    });
 
     // get product from db
-    app.get('/products', async (req, res)=>{
-      const result = await productCollections.find().toArray()
-      res.send(result)
-    })
+    app.get("/products", async (req, res) => {
+      const result = await productCollections.find().toArray();
+      res.send(result);
+    });
 
+    // get product using Id
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productCollections.findOne(query);
+      res.send(result);
+    });
 
     // Generate jwt token
     app.post("/jwt", async (req, res) => {
