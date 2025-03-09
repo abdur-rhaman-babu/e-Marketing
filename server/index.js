@@ -70,10 +70,17 @@ async function run() {
       res.send(result);
     });
 
+
     // save product in db
     app.post('/product', verifyToken, async (req, res)=>{
       const product = req.body
       const result = await productCollections.insertOne(product)
+      res.send(result)
+    })
+
+    // get product from db
+    app.get('/products', async (req, res)=>{
+      const result = await productCollections.find().toArray()
       res.send(result)
     })
 
