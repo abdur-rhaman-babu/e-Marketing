@@ -5,7 +5,7 @@ import useProduct from "../../hooks/useProduct";
 
 const Plants = () => {
   const {data: products, isLoading} = useProduct();
-  console.log(products)
+  // console.log(products)
   if (isLoading) return <LoadingSpinner />;
   return (
     <Container>
