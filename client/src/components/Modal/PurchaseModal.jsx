@@ -12,7 +12,7 @@ import Button from "./../Shared/Button/Button";
 import toast from "react-hot-toast";
 import useAxiosSecure from "./../../hooks/useAxiosSecure";
 
-const PurchaseModal = ({ closeModal, isOpen, product,refetch }) => {
+const PurchaseModal = ({ closeModal, isOpen, product, refetch }) => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
 
@@ -73,7 +73,7 @@ const PurchaseModal = ({ closeModal, isOpen, product,refetch }) => {
         quantityToUpdate: totalQuantity,
       });
       toast.success("Order successful!");
-      refetch()
+      refetch();
     } catch (err) {
       console.log(err);
     } finally {
