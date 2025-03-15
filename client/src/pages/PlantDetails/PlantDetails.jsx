@@ -13,11 +13,7 @@ const PlantDetails = () => {
   const { id } = useParams();
   let [isOpen, setIsOpen] = useState(false);
 
-  const {
-    data: product,
-    isLoading,
-    refetch,
-  } = useQuery({
+  const { data: product, isLoading } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
       const res = await axios.get(
@@ -27,7 +23,7 @@ const PlantDetails = () => {
     },
   });
 
-  console.log(product);
+  // console.log(product);
 
   const { name, category, image, description, price, quantity, seller } =
     product || {};
@@ -36,7 +32,7 @@ const PlantDetails = () => {
     setIsOpen(false);
   };
 
-  if(isLoading) return <LoadingSpinner/>
+  if (isLoading) return <LoadingSpinner />;
 
   return (
     <Container>
@@ -88,13 +84,20 @@ const PlantDetails = () => {
           <div className="flex justify-between">
             <p className="font-bold text-3xl text-gray-500">Price: {price}$</p>
             <div>
-              <Button label="Purchase" />
+              <Button
+                onClick={() => setIsOpen(true)}
+                label={quantity > 0 ? "Purchase" : "Out of stock"}
+              />
             </div>
           </div>
           <hr className="my-6" />
 
           {/* Purchase Modal */}
-          <PurchaseModal closeModal={closeModal} isOpen={isOpen} />
+          <PurchaseModal
+            product={product}
+            closeModal={closeModal}
+            isOpen={isOpen}
+          />
         </div>
       </div>
     </Container>
