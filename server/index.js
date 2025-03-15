@@ -50,6 +50,7 @@ async function run() {
     const db = client.db("e-marketing");
     const userCollections = db.collection("users");
     const productCollections = db.collection("products");
+    const ordersCollections = db.collection("orders");
 
     // save or update user
     app.post("/user/:email", async (req, res) => {
@@ -89,6 +90,13 @@ async function run() {
       const result = await productCollections.findOne(query);
       res.send(result);
     });
+
+    // save purchase data in db
+    app.post('/orders', async (req, res)=>{
+      const order = req.body;
+      const result = await ordersCollections.insertOne(order)
+      res.send(result)
+    })
 
     // Generate jwt token
     app.post("/jwt", async (req, res) => {
