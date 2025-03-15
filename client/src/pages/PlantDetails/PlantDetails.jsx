@@ -13,7 +13,7 @@ const PlantDetails = () => {
   const { id } = useParams();
   let [isOpen, setIsOpen] = useState(false);
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, refetch } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
       const res = await axios.get(
@@ -97,6 +97,7 @@ const PlantDetails = () => {
             product={product}
             closeModal={closeModal}
             isOpen={isOpen}
+            refetch={refetch}
           />
         </div>
       </div>
