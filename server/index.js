@@ -92,11 +92,23 @@ async function run() {
     });
 
     // save purchase data in db
-    app.post('/orders', async (req, res)=>{
+    app.post("/orders", verifyToken, async (req, res) => {
       const order = req.body;
-      const result = await ordersCollections.insertOne(order)
-      res.send(result)
-    })
+      const result = await ordersCollections.insertOne(order);
+      res.send(result);
+    });
+
+    // update quantity when increase quantity
+    app.patch("/product/quantity/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const { quantityToUpdate } = req.body;
+      const updateDoc = {
+        $inc: { quantity: -quantityToUpdate },
+      };
+      const result = await productCollections.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
     // Generate jwt token
     app.post("/jwt", async (req, res) => {
