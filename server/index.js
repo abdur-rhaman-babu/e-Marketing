@@ -110,6 +110,40 @@ async function run() {
       res.send(result);
     });
 
+    // get order data with specific email
+    app.get("/orders", async (req, res) => {
+      const email = req.query.email;
+      const result = await ordersCollections
+        .aggregate([
+          {
+            $match: { "customer.email": email },
+          },
+          {
+            $addFields:{
+              productId:{$toObjectId: '$productId'}
+            }
+          },
+          {
+            $lookup:{
+              from:'products',
+              localField:'productId',
+              foreignField:'_id',
+              as: 'products'
+            }
+          },
+          {$unwind:'$products'},
+          {
+            $addFields:{
+              name:'$products.name',
+              category:'$products.category',
+              image:'$products.image',
+            }
+          }
+        ])
+        .toArray();
+      res.send(result);
+    });
+
     // Generate jwt token
     app.post("/jwt", async (req, res) => {
       const email = req.body;
