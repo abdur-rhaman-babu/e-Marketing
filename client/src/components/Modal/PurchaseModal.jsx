@@ -11,10 +11,12 @@ import useAuth from "./../../hooks/useAuth";
 import Button from "./../Shared/Button/Button";
 import toast from "react-hot-toast";
 import useAxiosSecure from "./../../hooks/useAxiosSecure";
+import { useNavigate } from "react-router-dom";
 
 const PurchaseModal = ({ closeModal, isOpen, product, refetch }) => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const navigate = useNavigate()
 
   const { name, category, price, quantity, seller, _id } = product || {};
   const [totalQuantity, setTotalQuantity] = useState(1);
@@ -59,9 +61,9 @@ const PurchaseModal = ({ closeModal, isOpen, product, refetch }) => {
       return toast.error("Quantity must be more than 1");
     }
     setTotalQuantity(value);
-    setTotalPrice(parseInt(value) * price);
+    setTotalPrice(value * price);
     setPurchaseInfo((prev) => {
-      return { ...prev, quantity: value, price: parseInt(value) * price };
+      return { ...prev, quantity: value, price: value * price };
     });
   };
 
@@ -69,11 +71,16 @@ const PurchaseModal = ({ closeModal, isOpen, product, refetch }) => {
     try {
       await axiosSecure.post("/orders", purchaseInfo);
 
+      // decrese quantity from product
       await axiosSecure.patch(`product/quantity/${_id}`, {
         quantityToUpdate: totalQuantity,
+        status:'decrease'
       });
-      toast.success("Order successful!");
+
+      toast.success("Order successful!")
+      navigate('/dashboard/my-orders')
       refetch();
+
     } catch (err) {
       console.log(err);
     } finally {
@@ -143,7 +150,7 @@ const PurchaseModal = ({ closeModal, isOpen, product, refetch }) => {
                   </label>
                   <input
                     value={totalQuantity}
-                    onChange={(e) => handleQuantity(e.target.value)}
+                    onChange={(e) => handleQuantity(parseInt(e.target.value))}
                     className="px-4 py-3 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white"
                     name="quantity"
                     id="quantity"

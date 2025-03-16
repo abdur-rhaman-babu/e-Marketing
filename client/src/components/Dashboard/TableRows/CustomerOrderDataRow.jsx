@@ -1,60 +1,106 @@
-import PropTypes from 'prop-types'
-import { useState } from 'react'
-import DeleteModal from '../../Modal/DeleteModal'
-const CustomerOrderDataRow = () => {
-  let [isOpen, setIsOpen] = useState(false)
-  const closeModal = () => setIsOpen(false)
+/* eslint-disable react/prop-types */
+import PropTypes from "prop-types";
+import { useState } from "react";
+import { HiOutlineDotsVertical } from "react-icons/hi";
+import DeleteModal from "../../Modal/DeleteModal";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import toast from "react-hot-toast";
+
+const CustomerOrderCard = ({ order, refetch }) => {
+  const axiosSecure = useAxiosSecure();
+  const [isOpen, setIsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeModal = () => setIsOpen(false);
+
+  const { image, name, quantity, price, status, category, _id, productId } =
+    order;
+
+  // delete order/cancellation
+  const handleDelete = async () => {
+    try {
+      await axiosSecure.delete(`/order/${_id}`);
+
+      // increase quantity from product
+      await axiosSecure.patch(`product/quantity/${productId}`, {
+        quantityToUpdate: quantity,
+        status: "increase",
+      });
+
+      toast.success("Order successfully deleted");
+      refetch();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      closeModal();
+    }
+  };
 
   return (
-    <tr>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <div className='flex items-center'>
-          <div className='flex-shrink-0'>
-            <div className='block relative'>
-              <img
-                alt='profile'
-                src='https://i.ibb.co.com/rMHmQP2/money-plant-in-feng-shui-brings-luck.jpg'
-                className='mx-auto object-cover rounded h-10 w-15 '
-              />
-            </div>
-          </div>
+    <div className="bg-white shadow-lg rounded-2xl p-3 flex flex-col md:flex-row items-center gap-6 w-full max-w-lg md:max-w-3xl mx-auto border border-gray-200 relative">
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+      >
+        <HiOutlineDotsVertical size={24} />
+      </button>
+      {menuOpen && (
+        <div className="absolute top-12 right-4 w-32 bg-white shadow-lg rounded-lg py-2 z-10">
+          <button
+            onClick={() => {
+              setIsOpen(true);
+              setMenuOpen(false);
+            }}
+            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
         </div>
-      </td>
-
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className='text-gray-900 whitespace-no-wrap'>Money Plant</p>
-      </td>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className='text-gray-900 whitespace-no-wrap'>Indoor</p>
-      </td>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className='text-gray-900 whitespace-no-wrap'>$120</p>
-      </td>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className='text-gray-900 whitespace-no-wrap'>5</p>
-      </td>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className='text-gray-900 whitespace-no-wrap'>Pending</p>
-      </td>
-
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <button
-          onClick={() => setIsOpen(true)}
-          className='relative disabled:cursor-not-allowed cursor-pointer inline-block px-3 py-1 font-semibold text-lime-900 leading-tight'
+      )}
+      <img
+        src={image}
+        alt={name}
+        className="w-48 h-full object-cover rounded-lg shadow-md"
+      />
+      <div className="flex-1 space-y-2">
+        <h3 className="text-xl font-bold text-gray-800">{name}</h3>
+        <p className="text-sm text-gray-500">
+          Category:{" "}
+          <span className="font-medium text-gray-700">{category}</span>
+        </p>
+        <p className="text-sm text-gray-500">
+          Quantity:{" "}
+          <span className="font-medium text-gray-700">{quantity}</span>
+        </p>
+        <p className="text-sm text-gray-500">
+          Price: <span className="font-medium text-gray-700">${price}</span>
+        </p>
+        <p
+          className={`text-sm font-semibold ${
+            status === "Pending" ? "text-yellow-500" : "text-green-500"
+          }`}
         >
-          <span className='absolute cursor-pointer inset-0 bg-red-200 opacity-50 rounded-full'></span>
-          <span className='relative cursor-pointer'>Cancel</span>
-        </button>
+          Status: {status}
+        </p>
+      </div>
+      <DeleteModal
+        handleDelete={handleDelete}
+        isOpen={isOpen}
+        closeModal={closeModal}
+      />
+    </div>
+  );
+};
 
-        <DeleteModal isOpen={isOpen} closeModal={closeModal} />
-      </td>
-    </tr>
-  )
-}
+CustomerOrderCard.propTypes = {
+  order: PropTypes.shape({
+    image: PropTypes.string,
+    name: PropTypes.string,
+    quantity: PropTypes.number,
+    price: PropTypes.number,
+    status: PropTypes.string,
+    category: PropTypes.string,
+    _id: PropTypes.string,
+  }).isRequired,
+};
 
-CustomerOrderDataRow.propTypes = {
-  order: PropTypes.object,
-  refetch: PropTypes.func,
-}
-
-export default CustomerOrderDataRow
+export default CustomerOrderCard;
