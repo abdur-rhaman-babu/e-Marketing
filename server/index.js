@@ -99,16 +99,47 @@ async function run() {
     });
 
     // update quantity when increase quantity
+    // app.patch("/product/quantity/:id", verifyToken, async (req, res) => {
+    //   const id = req.params.id;
+    //   const { quantityToUpdate, status } = req.body;
+    //   const filter = { _id: new ObjectId(id) };
+
+    //   const updateDoc = {
+    //     $inc: { quantity: -quantityToUpdate },
+    //   };
+
+    //   if(status === 'increase'){
+    //     updateDoc = {
+    //       $inc: { quantity: quantityToUpdate },
+    //     };
+    //   }
+    //   const result = await productCollections.updateOne(filter, updateDoc);
+    //   res.send(result);
+    // });
+
     app.patch("/product/quantity/:id", verifyToken, async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const { quantityToUpdate } = req.body;
-      const updateDoc = {
-        $inc: { quantity: -quantityToUpdate },
-      };
-      const result = await productCollections.updateOne(filter, updateDoc);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const { quantityToUpdate, status } = req.body;
+        const filter = { _id: new ObjectId(id) };
+    
+        let updateDoc;
+        if (status === "increase") {
+          updateDoc = { $inc: { quantity: quantityToUpdate } };
+        } else {
+          updateDoc = { $inc: { quantity: -quantityToUpdate } };
+        }
+    
+        const result = await productCollections.updateOne(filter, updateDoc);
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+        res.status(500).send({ error: "Internal Server Error" });
+      }
     });
+    
+
+
 
     // get order data with specific email
     app.get("/orders", async (req, res) => {
@@ -119,28 +150,46 @@ async function run() {
             $match: { "customer.email": email },
           },
           {
-            $addFields:{
-              productId:{$toObjectId: '$productId'}
-            }
+            $addFields: {
+              productId: { $toObjectId: "$productId" },
+            },
           },
           {
-            $lookup:{
-              from:'products',
-              localField:'productId',
-              foreignField:'_id',
-              as: 'products'
-            }
+            $lookup: {
+              from: "products",
+              localField: "productId",
+              foreignField: "_id",
+              as: "products",
+            },
           },
-          {$unwind:'$products'},
+          { $unwind: "$products" },
           {
-            $addFields:{
-              name:'$products.name',
-              category:'$products.category',
-              image:'$products.image',
-            }
-          }
+            $addFields: {
+              name: "$products.name",
+              category: "$products.category",
+              image: "$products.image",
+            },
+          },
+          {
+            $project: {
+              products: 0,
+            },
+          },
         ])
         .toArray();
+      res.send(result);
+    });
+
+    // delete data from order
+    app.delete("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const order = await ordersCollections.findOne(query);
+      if (order.status === "delivered")
+        return res
+          .status(409)
+          .send("Cannot cancel once the product is delivered");
+      const result = await ordersCollections.deleteOne(query);
       res.send(result);
     });
 
