@@ -26,10 +26,10 @@ const CustomerOrderCard = ({ order, refetch }) => {
         status: "increase",
       });
 
-      toast.success("Order successfully deleted");
+      toast.success("Order cancelled");
       refetch();
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      toast.error(err.response.data)
     } finally {
       closeModal();
     }
