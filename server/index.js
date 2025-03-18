@@ -99,37 +99,20 @@ async function run() {
     });
 
     // update quantity when increase quantity
-    // app.patch("/product/quantity/:id", verifyToken, async (req, res) => {
-    //   const id = req.params.id;
-    //   const { quantityToUpdate, status } = req.body;
-    //   const filter = { _id: new ObjectId(id) };
-
-    //   const updateDoc = {
-    //     $inc: { quantity: -quantityToUpdate },
-    //   };
-
-    //   if(status === 'increase'){
-    //     updateDoc = {
-    //       $inc: { quantity: quantityToUpdate },
-    //     };
-    //   }
-    //   const result = await productCollections.updateOne(filter, updateDoc);
-    //   res.send(result);
-    // });
 
     app.patch("/product/quantity/:id", verifyToken, async (req, res) => {
       try {
         const id = req.params.id;
         const { quantityToUpdate, status } = req.body;
         const filter = { _id: new ObjectId(id) };
-    
+
         let updateDoc;
         if (status === "increase") {
           updateDoc = { $inc: { quantity: quantityToUpdate } };
         } else {
           updateDoc = { $inc: { quantity: -quantityToUpdate } };
         }
-    
+
         const result = await productCollections.updateOne(filter, updateDoc);
         res.send(result);
       } catch (error) {
@@ -137,9 +120,6 @@ async function run() {
         res.status(500).send({ error: "Internal Server Error" });
       }
     });
-    
-
-
 
     // get order data with specific email
     app.get("/orders", async (req, res) => {
@@ -185,11 +165,30 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const order = await ordersCollections.findOne(query);
-      if (order.status === "delivered")
+      if (order.status === "Delivered")
         return res
           .status(409)
           .send("Cannot cancel once the product is delivered");
       const result = await ordersCollections.deleteOne(query);
+      res.send(result);
+    });
+
+    // manage user status
+    app.patch("/user/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await userCollections.findOne(query);
+      if (!user || user?.status === "Requested")
+        return res
+          .status(400)
+          .send("You have already requested wait for some time");
+
+      const updatedDoc = {
+        $set: {
+          status: "Requested",
+        },
+      };
+      const result = await userCollections.updateOne(query, updatedDoc);
       res.send(result);
     });
 
