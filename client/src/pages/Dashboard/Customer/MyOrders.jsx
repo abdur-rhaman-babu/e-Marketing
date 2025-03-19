@@ -30,15 +30,19 @@ const MyOrders = () => {
         <title>My Orders</title>
       </Helmet>
       <div className="container mx-auto">
-        <div className="grid lg:grid-cols-3 gap-3">
-          {orders.map((order) => (
-            <CustomerOrderDataRow
-              key={order._id}
-              order={order}
-              refetch={refetch}
-            />
-          ))}
-        </div>
+        {orders.length <= 0 ? (
+          <div>No order available</div>
+        ) : (
+          <div className="grid lg:grid-cols-3 gap-3">
+            {orders.map((order) => (
+              <CustomerOrderDataRow
+                key={order._id}
+                order={order}
+                refetch={refetch}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
