@@ -238,6 +238,14 @@ async function run() {
       res.send(result);
     });
 
+    // delete product by seller form db
+    app.delete("/product/:id", verifyToken, verifySeller, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productCollections.deleteOne(query);
+      res.send(result);
+    });
+
     // update a user role & status
     app.patch(
       "/user/role/:email",
