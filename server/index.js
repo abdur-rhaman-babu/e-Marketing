@@ -52,6 +52,28 @@ async function run() {
     const productCollections = db.collection("products");
     const ordersCollections = db.collection("orders");
 
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      // console.log('verify admin from ----->', req.user)
+      const email = req?.user?.email;
+      const query = { email };
+      const result = await userCollections.findOne(query);
+      if (!result || result?.role !== "Admin")
+        return res.status(403).send({ message: "Forbidden Access" });
+      next();
+    };
+
+    // verify seller
+    const verifySeller = async (req, res, next) => {
+      // console.log('verify admin from ----->', req.user)
+      const email = req?.user?.email;
+      const query = { email };
+      const result = await userCollections.findOne(query);
+      if (!result || result?.role !== "seller")
+        return res.status(403).send({ message: "Forbidden Access" });
+      next();
+    };
+
     // save or update user
     app.post("/user/:email", async (req, res) => {
       const email = req.params.email;
@@ -70,8 +92,8 @@ async function run() {
       res.send(result);
     });
 
-    // save product in db
-    app.post("/product", verifyToken, async (req, res) => {
+    // add product in db
+    app.post("/product", verifyToken, verifySeller, async (req, res) => {
       const product = req.body;
       const result = await productCollections.insertOne(product);
       res.send(result);
@@ -99,7 +121,6 @@ async function run() {
     });
 
     // update quantity when increase quantity
-
     app.patch("/product/quantity/:id", verifyToken, async (req, res) => {
       try {
         const id = req.params.id;
@@ -201,7 +222,7 @@ async function run() {
     });
 
     // get users data
-    app.get("/users/:email", verifyToken, async (req, res) => {
+    app.get("/users/:email", verifyToken, verifyAdmin, async (req, res) => {
       const email = req.params.email;
       const query = { email: { $ne: email } };
       const result = await userCollections.find(query).toArray();
@@ -214,7 +235,7 @@ async function run() {
       const query = { email };
       const { role } = req.body;
       const updatedDoc = {
-        $set: { role, status: 'Veryfied' },
+        $set: { role, status: "Veryfied" },
       };
       const result = await userCollections.updateOne(query, updatedDoc);
       res.send(result);
