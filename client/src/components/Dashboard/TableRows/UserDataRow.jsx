@@ -1,9 +1,24 @@
 import { useState } from "react";
 import UpdateUserModal from "../../Modal/UpdateUserModal";
 import PropTypes from "prop-types";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+
 const UserDataRow = ({ user, refetch }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { role, email, status } = user;
+  const { role, email, status } = user || {};
+  const axiosSecure = useAxiosSecure();
+
+  const updateRole = async (selectedRole) => {
+    if (role === selectedRole) return;
+    try {
+      await axiosSecure.patch(`/user/role/${email}`, {role: selectedRole});
+      refetch();
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsOpen(false);
+    }
+  };
 
   return (
     <tr>
@@ -39,7 +54,12 @@ const UserDataRow = ({ user, refetch }) => {
           <span className="relative">Update Role</span>
         </span>
         {/* Modal */}
-        <UpdateUserModal isOpen={isOpen} setIsOpen={setIsOpen} />
+        <UpdateUserModal
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          role={role}
+          updateRole={updateRole}
+        />
       </td>
     </tr>
   );
