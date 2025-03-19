@@ -22,7 +22,7 @@ const AddPlantForm = ({
                 name="name"
                 id="name"
                 type="text"
-                placeholder="Plant Name"
+                placeholder="Product Name"
                 required
               />
             </div>

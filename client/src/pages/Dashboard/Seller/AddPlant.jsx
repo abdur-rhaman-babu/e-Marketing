@@ -45,7 +45,7 @@ const AddPlant = () => {
     try{
       await axiosSecure.post('/product', product)
       toast.success('Data Added Successfully!')
-      navigate('/')
+      navigate('/dashboard/my-inventory')
     }catch(err){
       console.log(err)
     }finally{
