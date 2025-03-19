@@ -221,7 +221,7 @@ async function run() {
       res.send({ role: result?.role });
     });
 
-    // get users data
+    // get all users data
     app.get("/users/:email", verifyToken, verifyAdmin, async (req, res) => {
       const email = req.params.email;
       const query = { email: { $ne: email } };
@@ -229,17 +229,31 @@ async function run() {
       res.send(result);
     });
 
-    // update a user role & status
-    app.patch("/user/role/:email", verifyToken, async (req, res) => {
-      const email = req.params.email;
-      const query = { email };
-      const { role } = req.body;
-      const updatedDoc = {
-        $set: { role, status: "Veryfied" },
-      };
-      const result = await userCollections.updateOne(query, updatedDoc);
+    // get product for specific seller
+    app.get("/products/seller", verifyToken, verifySeller, async (req, res) => {
+      const email = req.user.email;
+      const result = await productCollections
+        .find({ "seller.email": email })
+        .toArray();
       res.send(result);
     });
+
+    // update a user role & status
+    app.patch(
+      "/user/role/:email",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const email = req.params.email;
+        const query = { email };
+        const { role } = req.body;
+        const updatedDoc = {
+          $set: { role, status: "Veryfied" },
+        };
+        const result = await userCollections.updateOne(query, updatedDoc);
+        res.send(result);
+      }
+    );
 
     // Generate jwt token
     app.post("/jwt", async (req, res) => {
