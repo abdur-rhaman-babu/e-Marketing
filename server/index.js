@@ -195,9 +195,17 @@ async function run() {
     // get user role
     app.get("/user/role/:email", async (req, res) => {
       const email = req.params.email;
-      const query = {email};
-      const result = await userCollections.findOne(query)
-      res.send({role: result?.role})
+      const query = { email };
+      const result = await userCollections.findOne(query);
+      res.send({ role: result?.role });
+    });
+
+    // get users data
+    app.get("/users/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: { $ne: email } };
+      const result = await userCollections.find(query).toArray();
+      res.send(result);
     });
 
     // Generate jwt token
