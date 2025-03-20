@@ -246,6 +246,26 @@ async function run() {
       res.send(result);
     });
 
+    // get product for update by seller
+    app.get("/product/:id", verifyToken, verifySeller, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productCollections.findOne(query);
+      res.send(result);
+    });
+
+    // update product
+    app.put("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateProduct = req.body;
+      const updateDoc = {
+        $set: updateProduct,
+      };
+      const result = await productCollections.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // update a user role & status
     app.patch(
       "/user/role/:email",
