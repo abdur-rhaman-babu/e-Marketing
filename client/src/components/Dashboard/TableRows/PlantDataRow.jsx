@@ -22,8 +22,8 @@ const PlantDataRow = ({ product, refetch }) => {
   const handleDeleteProduct = async () => {
     try {
       await axiosSecure.delete(`/product/${_id}`);
-      toast.success('Product delete successfully!')
-      refetch()
+      toast.success("Product delete successfully!");
+      refetch();
     } catch (err) {
       toast.error(err.response.data);
     } finally {
@@ -73,7 +73,7 @@ const PlantDataRow = ({ product, refetch }) => {
         <DeleteModal
           isOpen={isOpen}
           closeModal={closeModal}
-          handleDeleteProduct={handleDeleteProduct}
+          handleDelete={handleDeleteProduct}
         />
       </td>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
@@ -88,8 +88,10 @@ const PlantDataRow = ({ product, refetch }) => {
           <span className="relative">Update</span>
         </span>
         <UpdatePlantModal
+          id={_id}
           isOpen={isEditModalOpen}
           setIsEditModalOpen={setIsEditModalOpen}
+          refetch={refetch}
         />
       </td>
     </tr>

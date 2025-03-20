@@ -1,5 +1,4 @@
 import { Helmet } from "react-helmet-async";
-
 import PlantDataRow from "../../../components/Dashboard/TableRows/PlantDataRow";
 import useAxiosSecure from "./../../../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
