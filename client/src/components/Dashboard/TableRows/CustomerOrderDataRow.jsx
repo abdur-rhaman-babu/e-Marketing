@@ -29,7 +29,7 @@ const CustomerOrderCard = ({ order, refetch }) => {
       toast.success("Order cancelled");
       refetch();
     } catch (err) {
-      toast.error(err.response.data)
+      toast.error(err.response.data);
     } finally {
       closeModal();
     }
@@ -46,11 +46,19 @@ const CustomerOrderCard = ({ order, refetch }) => {
       {menuOpen && (
         <div className="absolute top-12 right-4 w-32 bg-white shadow-lg rounded-lg py-2 z-10">
           <button
+            disabled={status === "Delivered"}
             onClick={() => {
               setIsOpen(true);
               setMenuOpen(false);
             }}
-            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+            className={`
+              block w-full text-left px-4 py-2 hover:bg-gray-100 
+              ${
+                status === "Delivered"
+                  ? "text-gray-800 cursor-not-allowed"
+                  : "text-red-600"
+              }
+            `}
           >
             Cancel
           </button>

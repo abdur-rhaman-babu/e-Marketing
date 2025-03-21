@@ -87,10 +87,14 @@ const UpdatePlantForm = ({ id, setIsEditModalOpen, refetch }) => {
                 name="category"
                 defaultValue={category}
               >
-                <option value="Indoor">Indoor</option>
-                <option value="Outdoor">Outdoor</option>
-                <option value="Succulent">Succulent</option>
-                <option value="Flowering">Flowering</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Electric">Electric</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Grocery">Grocery</option>
+                <option value="Health">Health</option>
+                <option value="Beauty">Beauty</option>
+                <option value="Kids">Kids</option>
+                <option value="Sports">Sports</option>
               </select>
             </div>
 
