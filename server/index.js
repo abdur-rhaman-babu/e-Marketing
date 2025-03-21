@@ -142,8 +142,8 @@ async function run() {
       }
     });
 
-    // get order data with specific email
-    app.get("/orders", async (req, res) => {
+    // get order data with specific customer email
+    app.get("/orders", verifyToken, async (req, res) => {
       const email = req.query.email;
       const result = await ordersCollections
         .aggregate([
@@ -178,6 +178,55 @@ async function run() {
           },
         ])
         .toArray();
+      res.send(result);
+    });
+
+    // get order data with specific seller email
+    app.get("/manage-orders", verifyToken, verifySeller, async (req, res) => {
+      const email = req.query.email;
+      const result = await ordersCollections
+        .aggregate([
+          {
+            $match: { seller: email },
+          },
+          {
+            $addFields: {
+              productId: { $toObjectId: "$productId" },
+            },
+          },
+          {
+            $lookup: {
+              from: "products",
+              localField: "productId",
+              foreignField: "_id",
+              as: "products",
+            },
+          },
+          { $unwind: "$products" },
+          {
+            $addFields: {
+              name: "$products.name",
+            },
+          },
+          {
+            $project: {
+              products: 0,
+            },
+          },
+        ])
+        .toArray();
+      res.send(result);
+    });
+
+    // update order status
+    app.patch("/order/:id", verifyToken, verifySeller, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const { status } = req.body;
+      const updatedDoc = {
+        $set: { status },
+      };
+      const result = await ordersCollections.updateOne(filter, updatedDoc);
       res.send(result);
     });
 
