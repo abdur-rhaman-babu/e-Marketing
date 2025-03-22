@@ -1,4 +1,5 @@
 require("dotenv").config();
+const nodemailer = require("nodemailer");
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -33,6 +34,46 @@ const verifyToken = async (req, res, next) => {
     }
     req.user = decoded;
     next();
+  });
+};
+
+// send email using nodemailer
+const sendEmail = (emailAddress, emailData) => {
+  // create transport
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // true for port 465, false for other ports
+    auth: {
+      user: process.env.NODEMAILER_USER,
+      pass: process.env.NODEMAILER_PASS,
+    },
+  });
+  // verify connection
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Trnasporter ready to take email", success);
+    }
+  });
+
+  // transporter.sendMail()
+  const mailBody = {
+    from: process.env.NODEMAILER_USER, // sender address
+    to: emailAddress, // list of receivers
+    subject: emailData?.subject, // Subject line
+    html: `<p>${emailData?.message}</p>`, // html body
+  };
+
+  // send email
+  transporter.sendMail(mailBody, (error, info) => {
+    if (error) {
+      console.log(error);
+    } else {
+      // console.log(info);
+      console.log("Sent email: " + info?.response);
+    }
   });
 };
 
@@ -116,7 +157,20 @@ async function run() {
     // save purchase data in db
     app.post("/orders", verifyToken, async (req, res) => {
       const order = req.body;
+      // console.log(order)
       const result = await ordersCollections.insertOne(order);
+      // send email
+      if (result?.insertedId) {
+        sendEmail(order?.customer?.email, {
+          subject: "Order Confirmed ✅",
+          message: `Congratulations! Your order has been placed successfully. Transaction ID: ${result?.insertedId}`,
+        });
+        // to seller
+        sendEmail(order?.seller, {
+          subject: "Hurry!, you have an order to process",
+          message: `Get the product ready for ${order?.customer?.name}`,
+        });
+      }
       res.send(result);
     });
 
