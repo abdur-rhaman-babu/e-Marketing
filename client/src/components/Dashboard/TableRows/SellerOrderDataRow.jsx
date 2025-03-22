@@ -40,9 +40,7 @@ const SellerOrderDataRow = ({ order, refetch }) => {
       refetch();
     } catch (err) {
       toast.error(err.response.data);
-    } finally {
-      closeModal();
-    }
+    } 
   };
   return (
     <tr>
