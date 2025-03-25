@@ -8,17 +8,26 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import LoadingSpinner from "../../components/Shared/LoadingSpinner";
+import useAuth from "../../hooks/useAuth";
+import useRole from "./../../hooks/useRole";
 
 const PlantDetails = () => {
+  const [role] = useRole();
+  const { user } = useAuth();
   const { id } = useParams();
   let [isOpen, setIsOpen] = useState(false);
 
-  const { data: product = {}, isLoading, refetch } = useQuery({
+  const {
+    data: product = {},
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/product/${id}`
       );
+
       return res.data;
     },
   });
@@ -84,16 +93,16 @@ const PlantDetails = () => {
           <div className="flex justify-between">
             <p className="font-bold text-3xl text-gray-500">Price: {price}$</p>
             <div>
-              {
-                quantity > 0 ? <Button
+              <Button
+                disabled={
+                  !user ||
+                  user?.email === seller?.email ||
+                  role !== "customer" ||
+                  quantity === 0
+                }
                 onClick={() => setIsOpen(true)}
-                label= "Purchase"
-              /> : <Button
-              disabled
-              onClick={() => setIsOpen(true)}
-              label= "Out of stock"/>
-              }
-             
+                label={quantity > 0 ? "Purchase" : "Out of Stock"}
+              />
             </div>
           </div>
           <hr className="my-6" />

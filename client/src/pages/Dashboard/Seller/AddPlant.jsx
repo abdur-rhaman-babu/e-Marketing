@@ -7,12 +7,14 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
+
 const AddPlant = () => {
   const { user } = useAuth();
   const [uploadImageText, setUploadImageText] = useState({ name: "Upload" });
   const [loading, setLoading] = useState(false)
   const axiosSecure = useAxiosSecure()
   const navigate = useNavigate()
+ 
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setLoading(true)
