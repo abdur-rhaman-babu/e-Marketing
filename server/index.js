@@ -386,6 +386,36 @@ async function run() {
       }
     );
 
+    // admin statistics
+    app.get("/admin-stat", verifyToken, verifyAdmin, async (req, res) => {
+      const totalUser = await userCollections.estimatedDocumentCount();
+      const totalProduct = await productCollections.estimatedDocumentCount();
+      // const allOrder = await ordersCollections.find().toArray();
+      // const totalOrders = allOrder.length;
+      // const totalRevenue = allOrder.reduce(
+      //   (sum, order) => sum + order.price,
+      //   0
+      // );
+
+      // get total revenue, total orders
+      const orderDetails = await ordersCollections.aggregate([
+        {
+          $group:{
+            _id: null,
+            totalRevenue: {$sum: '$price'},
+            totalOrders: {$sum: 1}
+          }
+        },
+        {
+          $project:{
+            _id: 0,
+          }
+        }
+      ]).next()
+     
+      res.send({ totalUser, totalProduct, ...orderDetails });
+    });
+
     // Generate jwt token
     app.post("/jwt", async (req, res) => {
       const email = req.body;
